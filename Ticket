@@ -1,0 +1,314 @@
+#define _CRT_SECURE_NO_WARNINGS
+
+#include <iostream>
+#include <string>
+#include <vector>
+using namespace std;
+
+static int m{ 0 }, y{ 0 };
+
+unsigned ValidInt()
+{
+	while (true)
+	{
+		int a;
+		cin >> a;
+		if (cin.fail())
+		{
+			cin.clear();
+			cin.ignore(1000, '\n');
+			cout << "Вы ввели не ИНТовое значение. Повторите ввод: " << endl;
+		}
+		else
+		{
+			cin.ignore(1000, '\n');
+			return a;
+		}
+	}
+}
+
+
+class Ticket
+{
+protected:
+	string t_Destination, t_FIO;
+	unsigned t_FlightNumber, t_Day, t_Month, t_Year;
+
+public:
+
+	string GetDestination()
+	{return t_Destination;}
+
+	string GetFIO()
+	{return t_FIO;}
+
+	unsigned GetFlightNumber()
+	{return t_FlightNumber;}
+
+	unsigned GetDay()
+	{return t_Day;}
+
+	unsigned GetMonth()
+	{return t_Month;}
+
+	unsigned GetYear()
+	{return t_Year;}
+
+
+	Ticket(unsigned day = 0, unsigned month = 0, unsigned year = 0, unsigned FN = 0, string dest = " ", string FIO = " ")
+		: t_Day(day), t_Month(month), t_Year(year), t_FlightNumber(FN), t_Destination(dest), t_FIO(FIO)
+	{}
+
+
+
+	string SetDestinaton()
+	{
+		cout << "Пункт назначения:  ";
+		string S_Destination;
+		cin >> S_Destination;
+		return S_Destination;
+	}
+
+	string SetFIO()
+	{
+		cout << "Введите ФИО, разделяя пробелом:  ";
+		string S_FIO;
+		getline(cin, S_FIO);
+		return S_FIO;
+	}
+
+	unsigned SetFlightNumber()
+	{
+		cout << "Номер рейса:  ";
+		unsigned S_FlightNumber = ValidInt();
+		return S_FlightNumber;
+	}
+
+
+
+	time_t TEMP = time(NULL);
+	tm* LTM = localtime(&TEMP);
+	
+	unsigned SetYear()
+	{
+		cout << "Год:  ";
+		
+		unsigned S_Year;
+
+		while (true)
+		{
+			S_Year = ValidInt();
+			if (S_Year < 1900 + LTM->tm_year)
+			{
+				cout << "Год меньше нынешнего... " << endl;
+				continue;
+			}
+			else
+			{
+				y = S_Year;
+				return S_Year;
+			}
+		}
+	}
+
+
+	unsigned SetMonth()
+	{
+		cout << "Месяц: ";
+		
+		unsigned S_Month;
+
+		while (true)
+		{
+			S_Month = ValidInt();
+			if (S_Month > 12 || S_Month < 1 || (y == LTM->tm_year + 1900 && S_Month < LTM->tm_mon + 1))
+			{
+				cout << "Неверно указан месяц "<<LTM->tm_year + 1900 << " года..." << endl;
+			}
+			else
+			{
+				m = S_Month;
+				return S_Month;
+			}
+		}
+	}
+
+
+	unsigned SetDay()
+	{
+		cout << "День: ";
+		unsigned S_Day;
+
+		while (true)
+		{
+			S_Day = ValidInt();
+
+			if ((y == LTM->tm_year + 1900 && m == LTM->tm_mon + 1 && S_Day < LTM->tm_mday) || DayInMonth(y, m, S_Day))
+			{
+				cout << "Неверно введен день" << endl;
+				continue;
+			}
+			else
+			{return S_Day;}
+		}
+	}
+
+	bool DayInMonth(unsigned Year, unsigned Month, unsigned Day)
+
+	{
+		switch (Month)
+		{
+			case 1: if (Day < 1 || Day > 31)
+			{return 1;}
+				  else
+			{return 0;}
+		
+			case 2: if (FebDay(Year, Day))
+			{return 1;}
+				 else
+			{return 0;}
+
+			case 3: if (Day < 1 || Day > 31) 
+			{return 1;}
+				  else
+			{return 0;}
+
+			case 4: if (Day < 1 || Day > 30)
+			{return 1;}
+			  else
+			{return 0;}
+
+			case 5: if (Day < 1 || Day > 31)
+			{return 1;}
+			  else
+			{return 0;}
+
+			case 6: if (Day < 1 || Day > 30)
+			{return 1;}
+			  else
+			{return 0;}
+
+			case 7: if (Day < 1 || Day > 31)
+			{return 1;}
+			  else
+			{return 0;}
+
+			case 8:if (Day < 1 || Day > 31)
+			{return 1;}
+				 else
+			{return 0;}
+
+			case 9:if (Day < 1 || Day > 30)
+			{return 1;}
+			  else
+			{return 0;}
+
+			case 10:if (Day < 1 || Day > 31)
+			{return 1;}
+			   else
+			{return 0;}
+
+			case 11:if (Day < 1 || Day > 30)
+			{return 1;}
+			   else
+			{return 0;}
+
+			case 12:if (Day < 1 || Day > 31)
+			{return 1;}
+			   else
+			{return 0;}
+		}
+	}
+
+
+	bool FebDay(unsigned Year, unsigned Day)
+	{
+		if (Day < 1 || Day > 28)
+		{return 1;}
+		else if(Day == 29)
+		{
+			if (Year % 4 != 0)
+			{return 1;} else { return 0; }
+		} else { return 1; }
+	}
+};
+
+
+class TicketBase : public Ticket
+{
+private:
+	vector <Ticket> VbaseT;
+
+public:
+
+	void addTicket(TicketBase &Obj)
+	{
+		Obj.VbaseT.push_back({SetDay(), SetMonth(), SetYear(),SetFlightNumber(), SetDestinaton(), SetFIO()});
+	}
+
+	void delTicket(TicketBase& Obj)
+	{
+		unsigned a;
+		if(Obj.VbaseT.size()==0)
+		{cout << "Список пуст. Нельзя удалить пустой список. Нажмите что-нибудь и повторите ввод." << endl;
+			system("pause");}
+		else
+		{
+			cout<< "Введите номер пассажира, которого хотите удлаить: " << endl;
+			while (true)
+			{
+				a = ValidInt();
+				if (a>Obj.VbaseT.size() || a<1)
+				{
+					cout << "Введенное число за пределами списка" << endl;
+					continue;
+				}
+				else
+				{
+					Obj.VbaseT.erase(Obj.VbaseT.begin() + (a - 1));
+					break;
+				}
+			}
+		}
+	}
+
+
+	void PassList(TicketBase& Tick)
+	{
+		system("cls");
+		cout << endl << "\tСПИСОК ПАССАЖИРОВ" << endl << endl << endl;
+		for (size_t i = 0; i < Tick.VbaseT.size(); i++)
+		{
+			cout << "\tПассажир №  " << i + 1 <<endl<< endl;
+			cout << "\tПункт назначения:  " << VbaseT[i].GetDestination() << endl;
+			cout << "\tФИО:  " << VbaseT[i].GetFIO() << endl;
+			cout << "\tНомер рейса:  " << VbaseT[i].GetFlightNumber() << endl;
+			cout << "\tДД.ММ.ГГГГ вылета:  " << VbaseT[i].GetDay() << "." << VbaseT[i].GetMonth()<<"." << VbaseT[i].GetYear() << endl << endl << endl << endl;
+		}
+	}
+
+	void PassListAndMenu(TicketBase& Tick)
+	{
+		while (true)
+		{
+			Tick.PassList(Tick);
+
+			cout << "\tНажмите 1, 2 или 3, чтобы:" << endl << endl<< "\t1) добавить пассажира"<< endl<< "\t2) удалить пассажира"<< endl<< "\t3) выйти из программы " <<endl<< endl;
+			switch (ValidInt())
+			{
+			case 1:Tick.addTicket(Tick); break;
+			case 2:Tick.delTicket(Tick); break;
+			case 3: exit(0);
+			default: cout << "\nТакого пункта в меню нет. Нажмите Enter для повторного ввода\n\n"; system("pause");
+			}
+		}
+	}
+};
+
+
+int main()
+{
+	setlocale(0, "");
+	TicketBase Tick;
+	Tick.PassListAndMenu(Tick);
+}
